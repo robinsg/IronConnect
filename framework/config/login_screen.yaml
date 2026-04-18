@@ -1,0 +1,25 @@
+screen_name: "Sign On"
+description: "Standard IBM i Login Screen"
+indicators:
+  - "Sign On"
+  - "User"
+  - "Password"
+  - "System"
+fields:
+  user:
+    label: "User"
+    tabs_to_reach: 0
+    max_length: 10
+    description: "Username field (auto-flows if 10 chars)"
+  password:
+    label: "Password"
+    tabs_to_reach: 1
+    description: "Password field (conditional Tab if user < 10 chars)"
+  program_menu:
+    label: "Program/procedure"
+    tabs_to_reach: 2
+    description: "Optional initial programme"
+control_keys:
+  submit: "Enter"
+  exit: "F3"
+  help: "F1"

@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
+}
+
+:root {
+  --bg-primary: #050505;
+  --bg-secondary: #0D0E12;
+  --bg-accent: #161B22;
+  --text-primary: #E6EDF3;
+  --text-secondary: #7D8590;
+  --accent-color: #3FB950;
+  --terminal-green: #00FF41;
+  --border-color: #30363D;
+  --highlight: #2F81F7;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.panel {
+  background-color: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.terminal-viewport {
+  background-color: #000;
+  font-family: var(--font-mono);
+  position: relative;
+  overflow: auto;
+}
+
+.terminal-text {
+  color: var(--terminal-green);
+  line-height: 1.2;
+}
+
+.code-block {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #D1D5DB;
+  line-height: 1.5;
+  background-color: #0d1117;
+  overflow: auto;
+}
+
+.log-entry {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.log-time {
+  color: var(--text-secondary);
+  margin-right: 12px;
+}
+
+.log-tag {
+  color: var(--highlight);
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.log-tag.success {
+  color: var(--accent-color);
+}
+
+.badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  background: var(--bg-accent);
+  border: 1px solid var(--border-color);
+}
+
+.interactive-item {
+  transition: all 0.2s ease;
+}
+
+.interactive-item:hover {
+  background-color: var(--bg-accent);
+  color: var(--text-primary);
+}
+
+.tree-item-active {
+  color: var(--text-primary);
+  background-color: var(--bg-accent);
+  border-left: 2px solid var(--highlight);
+}

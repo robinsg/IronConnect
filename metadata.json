@@ -1,0 +1,6 @@
+{
+  "name": "IronConnect: IBM i Automation Framework",
+  "description": "Enterprise-grade TN5250 automation framework using Python, libtmux, and Robot Framework.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
