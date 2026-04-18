@@ -6,6 +6,7 @@ IronConnect is a robust, enterprise-grade automation framework designed for IBM 
 ## Core Components
 - **`TmuxDriver`**: Interfaces with `libtmux` to send keys and capture buffers.
 - **`BaseScreen`**: Implements the State Machine, ensuring "Input Inhibited" and indicator checks occur before every action.
+- **`IBMiLibrary`**: A Robot Framework bridge that exposes Python POM logic as natural language keywords.
 - **`YAML Configs`**: Store screen identifiers and field mappings, removing coordinates from code.
 - **`Page Object Model (POM)`**: Encapsulates screen-specific logic into reusable classes.
 
@@ -37,6 +38,27 @@ login = LoginScreen(driver)
 login.login("USERNAME", "PASSWORD")
 ```
 
+### Orchestration with Robot Framework
+For enterprise-grade orchestration and reporting, utilise the built-in Robot Framework library.
+
+**Example Test Case (`tasks/login_tests.robot`):**
+```robot
+*** Settings ***
+Library    framework.libraries.IBMiLibrary
+
+*** Test Cases ***
+Authenticate To LPAR
+    Initialize Connection
+    Login To System    user=MYUSER    password=MYPASS
+    Verify Positional Text    text=MAIN MENU    row=1    col=35
+    [Teardown]    Close Connection
+```
+
+**Execution:**
+```bash
+robot tasks/login_tests.robot
+```
+
 ## Connectivity Configuration
 IronConnect supports connectivity to diverse IBM i hosts (including local LPARs and on-site servers) via environment variables. This ensures that sensitive credentials are never hardcoded or committed to version control.
 
@@ -49,9 +71,11 @@ IBMI_USER=your_username
 IBMI_PASSWORD=your_password
 IBMI_SSL=true
 IBMI_DEVICE_NAME=MYDEV01
-IBMI_DEVICE_TYPE=IBM-3477-FC
+IBMI_DEVICE_TYPE=IBM-3477-FC  # Supports 27x132 dimensions
 IBMI_MAP=285
 ```
+
+The framework prioritises these variables during the initialisation sequence and automatically resizes the underlying tmux window to 132x27 if a 3477-class device is selected.
 
 ## Security & Stability
 - **Mandatory Validation**: Every navigation is verified against YAML indicators.

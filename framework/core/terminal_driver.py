@@ -19,7 +19,7 @@ class TmuxDriver:
     def start_session(self, config: Optional[IBMiConfig] = None):
         """
         Launches the tn5250 binary inside a new tmux session using the provided configuration.
-        Defaults to language code 285 (UK English).
+        Configures terminal dimensions based on the device type.
         """
         if config is None:
             config = IBMiConfig.load()
@@ -27,42 +27,44 @@ class TmuxDriver:
         if self.server.has_session(self.session_name):
             self.session = self.server.find_where({"session_name": self.session_name})
         else:
-            # Construct the tn5250 command with all parameters
-            # map=<map_code>
-            # env.DEVNAME=<device_name>
-            # env.TERM=<device_type>
-            # +ssl or -ssl
+            # Determine dimensions based on device type
+            # 3477-FC is common for 27x132 support
+            width, height = 80, 24
+            if "3477" in config.device_type:
+                width, height = 132, 27
             
             cmd_parts = ["tn5250"]
-            
-            # Application of the UK English map or custom map
             cmd_parts.append(f"map={config.map_code}")
             
-            # SSL Configuration
             if config.ssl_enabled:
                 cmd_parts.append("+ssl")
             
-            # Device Name (DEVNAME)
             if config.device_name:
                 cmd_parts.append(f"env.DEVNAME={config.device_name}")
             
-            # Device Type (TERM)
             if config.device_type:
                 cmd_parts.append(f"env.TERM={config.device_type}")
             
-            # Destination Host
             cmd_parts.append(config.host)
             
             full_cmd = " ".join(cmd_parts)
             
-            # Launch the session
+            # Launch the session with explicit window dimensions
             self.session = self.server.new_session(
                 session_name=self.session_name, 
-                window_command=full_cmd
+                window_command=full_cmd,
+                x=width,
+                y=height
             )
         
         self.window = self.session.attached_window
         self.pane = self.window.attached_pane
+
+    def get_dimensions(self) -> tuple[int, int]:
+        """Returns the current pane dimensions (width, height)."""
+        if not self.pane:
+            return 80, 24
+        return int(self.pane.display_width), int(self.pane.display_height)
 
     def send_keys(self, keys: str, enter: bool = True):
         """Sends raw keys to the tmux pane."""

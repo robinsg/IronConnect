@@ -32,14 +32,18 @@ async function startServer() {
 
     // API: Retrieve connectivity status (redacted for security)
     app.get('/api/framework/config-status', (req, res) => {
+        const deviceType = process.env.IBMI_DEVICE_TYPE || 'IBM-3477-FC';
+        const isWide = deviceType.includes('3477');
         res.json({
             host: process.env.IBMI_HOST || 'pub400.com',
             user: process.env.IBMI_USER ? '********' : 'NOT SET',
             password: process.env.IBMI_PASSWORD ? '********' : 'NOT SET',
             ssl: process.env.IBMI_SSL === 'true',
             deviceName: process.env.IBMI_DEVICE_NAME || 'AUTO',
-            deviceType: process.env.IBMI_DEVICE_TYPE || 'IBM-3477-FC',
-            map: process.env.IBMI_MAP || '285'
+            deviceType: deviceType,
+            map: process.env.IBMI_MAP || '285',
+            width: isWide ? 132 : 80,
+            height: isWide ? 27 : 24
         });
     });
 

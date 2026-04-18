@@ -4,7 +4,12 @@ indicators:
   - "Sign On"
   - "User"
   - "Password"
-  - "System"
+  - text: "System"
+    row: 3
+    col: 27
+  - text: "QINTER"
+    row: 4
+    col: 37
 fields:
   user:
     label: "User"

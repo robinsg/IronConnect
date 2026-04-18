@@ -149,7 +149,7 @@ export default function App() {
         <section className="panel border-x border-[#30363D]">
           <div className="panel-header">
             <span>TN5250 Visual Buffer (tmux Capture)</span>
-            <span className="text-[#00FF41] font-mono">BUFFER_OK [24x80]</span>
+            <span className="text-[#00FF41] font-mono">BUFFER_OK [{activeConfig?.height || 24}x{activeConfig?.width || 80}]</span>
           </div>
           <div className="flex-1 terminal-viewport flex items-center justify-center relative bg-black">
             {/* CRT Overlay Effect */}
