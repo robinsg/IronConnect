@@ -30,6 +30,41 @@ async function startServer() {
         }
     });
 
+    // API: Retrieve test results structure
+    app.get('/api/framework/results', async (req, res) => {
+        try {
+            const resultsPath = path.join(process.cwd(), 'results');
+            
+            const getDirEntries = async (dir: string): Promise<any[]> => {
+                try {
+                    const entries = await fs.readdir(dir, { withFileTypes: true });
+                    return await Promise.all(entries.map(async (entry) => {
+                        const relativePath = path.join(dir, entry.name);
+                        if (entry.isDirectory()) {
+                            return { 
+                                name: entry.name, 
+                                type: 'directory', 
+                                children: await getDirEntries(relativePath) 
+                            };
+                        }
+                        return { 
+                            name: entry.name, 
+                            type: 'file', 
+                            path: path.relative(process.cwd(), relativePath) 
+                        };
+                    }));
+                } catch {
+                    return [];
+                }
+            };
+
+            const structure = await getDirEntries(resultsPath);
+            res.json(structure);
+        } catch (error) {
+            res.json([]); // Return empty if directory doesn't exist
+        }
+    });
+
     // API: Retrieve connectivity status (redacted for security)
     app.get('/api/framework/config-status', (req, res) => {
         const deviceType = process.env.IBMI_DEVICE_TYPE || 'IBM-3477-FC';

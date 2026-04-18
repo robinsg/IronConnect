@@ -1,4 +1,5 @@
 from typing import Optional
+from robot.api import logger
 from framework.core.terminal_driver import TmuxDriver
 from framework.core.config import IBMiConfig
 from framework.screens.login_screen import LoginScreen
@@ -57,26 +58,33 @@ class IBMiLibrary:
         if not self.driver:
             raise RuntimeError("Driver not initialised.")
             
-        # We can use the current screen's verify logic or manual driver check
-        # Here we demonstrate using a generic verify via a temporary screen or direct driver access
-        # Best practice is to ensure the current screen is verified.
-        if self.current_screen:
-            # We can dynamically add an indicator to the current screen config for this check
-            # but usually, Robot keywords are used for ad-hoc checks or assertions.
+        buffer = self.driver.get_buffer()
+        width, _ = self.driver.get_dimensions()
+        
+        target_row = int(row) - 1
+        target_col = int(col) - 1
+        
+        if target_row >= len(buffer):
+            msg = f"Row {row} is out of bounds."
+            self.capture_screen_to_log(label=f"FAILURE: {msg}")
+            raise AssertionError(msg)
+            
+        row_content = buffer[target_row].ljust(width)
+        actual_text = row_content[target_col:target_col + len(text)]
+        
+        if actual_text != text:
+            msg = f"Positional mismatch at R{row}C{col}: Expected '{text}', found '{actual_text}'"
+            self.capture_screen_to_log(label=f"FAILURE: {msg}")
+            raise AssertionError(msg)
+
+    def capture_screen_to_log(self, label: str = "Terminal Buffer Capture"):
+        """
+        Captures the current tmux buffer and embeds it in the Robot Framework log.
+        """
+        if self.driver:
             buffer = self.driver.get_buffer()
-            width, _ = self.driver.get_dimensions()
-            
-            target_row = int(row) - 1
-            target_col = int(col) - 1
-            
-            if target_row >= len(buffer):
-                raise AssertionError(f"Row {row} is out of bounds.")
-                
-            row_content = buffer[target_row].ljust(width)
-            actual_text = row_content[target_col:target_col + len(text)]
-            
-            if actual_text != text:
-                raise AssertionError(f"Positional mismatch at R{row}C{col}: Expected '{text}', found '{actual_text}'")
+            screen_text = "\n".join(buffer)
+            logger.info(f"<div style='background-color:black; color:#00FF41; padding:10px; font-family:monospace; white-space:pre;'><b>{label}</b><br>{screen_text}</div>", html=True)
 
     def press_terminal_key(self, key: str):
         """

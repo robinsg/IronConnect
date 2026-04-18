@@ -36,6 +36,7 @@ interface FrameworkFile {
 
 export default function App() {
   const [files, setFiles] = useState<FrameworkFile[]>([]);
+  const [testResults, setTestResults] = useState<FrameworkFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<FrameworkFile | null>(null);
   const [activeConfig, setActiveConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -43,11 +44,13 @@ export default function App() {
   useEffect(() => {
     Promise.all([
       fetch('/api/framework/files').then(res => res.json()),
-      fetch('/api/framework/config-status').then(res => res.json())
+      fetch('/api/framework/config-status').then(res => res.json()),
+      fetch('/api/framework/results').then(res => res.json())
     ])
-      .then(([filesData, configData]) => {
+      .then(([filesData, configData, resultsData]) => {
         setFiles(filesData);
         setActiveConfig(configData);
+        setTestResults(resultsData);
         if (filesData.length > 0) {
            // Try to find login_screen.yaml as default
            const findFile = (nodes: FrameworkFile[]): FrameworkFile | null => {
@@ -140,6 +143,21 @@ export default function App() {
               renderFileTree(files)
             )}
           </div>
+          
+          <div className="border-t border-[#30363D] mt-2 h-1/2 flex flex-col overflow-hidden">
+             <div className="panel-header text-[10px] py-1">
+                <span>Test Execution Results</span>
+                <Activity size={10} className="opacity-50" />
+             </div>
+             <div className="flex-1 overflow-y-auto py-2 bg-[#0D1117]/50">
+                {testResults.length === 0 ? (
+                  <div className="px-6 py-4 text-[10px] text-[#7D8590]">No execution history found</div>
+                ) : (
+                  renderFileTree(testResults)
+                )}
+             </div>
+          </div>
+
           <div className="mt-auto p-4 border-t border-[#30363D]">
             <div className="badge block text-center py-1">PYTHON 3.12.4</div>
           </div>

@@ -59,6 +59,17 @@ Authenticate To LPAR
 robot tasks/login_tests.robot
 ```
 
+### Multi-System Orchestration
+When managing multiple IBM i instances, use the `run_tasks.py` orchestrator. This script automatically organises results into system-specific folders with timestamps.
+
+**Execution:**
+```bash
+# results/pub400_com/20240418_1325/
+IBMI_HOST=pub400.com python3 run_tasks.py tasks/login_tests.robot
+```
+
+The orchestrator also embeds a real-time terminal buffer capture directly into the Robot Framework `log.html` upon any verification failure, providing instant visual debugging for remote LPARs.
+
 ## Connectivity Configuration
 IronConnect supports connectivity to diverse IBM i hosts (including local LPARs and on-site servers) via environment variables. This ensures that sensitive credentials are never hardcoded or committed to version control.
 
