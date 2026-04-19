@@ -71,22 +71,34 @@ IBMI_HOST=pub400.com python3 run_tasks.py tasks/login_tests.robot
 The orchestrator also embeds a real-time terminal buffer capture directly into the Robot Framework `log.html` upon any verification failure, providing instant visual debugging for remote LPARs.
 
 ## Connectivity Configuration
-IronConnect supports connectivity to diverse IBM i hosts (including local LPARs and on-site servers) via environment variables. This ensures that sensitive credentials are never hardcoded or committed to version control.
+IronConnect supports both direct IP connectivity to LPARs and advanced **System Console** sessions via a Hardware Management Console (HMC).
 
-### Environment Specification (.env)
-Create a `.env` file in the project root (following the template in `.env.example`):
+### Direct Mode (Default)
+Standard 5250 connection directly to the IBM i host.
 
+### Console Mode (HMC)
+For monitoring IPLs or system maintenance, the framework can pivot through an HMC to establish a console session on port 2301 via SSL.
+
+**Environment Variables for HMC:**
 ```env
-IBMI_HOST=your.host.name
-IBMI_USER=your_username
-IBMI_PASSWORD=your_password
-IBMI_SSL=true
-IBMI_DEVICE_NAME=MYDEV01
-IBMI_DEVICE_TYPE=IBM-3477-FC  # Supports 27x132 dimensions
-IBMI_MAP=285
+IBMI_CONNECTION_MODE=console
+HMC_HOST=hmc.yourdomain.com
+HMC_USER=hmcuser
+HMC_PASSWORD=hmcpass
+HMC_LANGUAGE=23
+POWER_SYSTEM=SystemA
+LPAR_NAME=LPAR01
+CONSOLE_MODE=2        # 1=Dedicated, 2=Shared
+CONSOLE_PASSWORD=     # Required if Shared
 ```
 
-The framework prioritises these variables during the initialisation sequence and automatically resizes the underlying tmux window to 132x27 if a 3477-class device is selected.
+**Robot Keyword Usage:**
+```robot
+*** Test Cases ***
+IPL Monitoring Task
+    Initialize Connection    connection_mode=console
+    Login To System          user=QSECOFR    password=PASSWORD
+```
 
 ## Security & Stability
 - **Mandatory Validation**: Every navigation is verified against YAML indicators.

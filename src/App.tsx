@@ -123,8 +123,23 @@ export default function App() {
           </div>
           <div className="flex flex-col">
              <span className="text-[9px] uppercase tracking-tighter opacity-50">User</span>
-             <span className="text-zinc-300 font-mono">{activeConfig?.user}</span>
+             <span className="text-zinc-300 font-mono">
+               {activeConfig?.connectionMode === 'console' ? activeConfig?.hmcUser : activeConfig?.user}
+             </span>
           </div>
+          <div className="h-6 w-[1px] bg-zinc-800 self-center"></div>
+          <div className="flex flex-col">
+             <span className="text-[9px] uppercase tracking-tighter opacity-50">Mode</span>
+             <span className={cn("font-mono text-[10px] px-1 rounded", activeConfig?.connectionMode === 'console' ? "bg-amber-900/40 text-amber-500" : "bg-blue-900/40 text-blue-500")}>
+               {activeConfig?.connectionMode === 'console' ? 'HMC CONSOLE' : 'DIRECT LPAR'}
+             </span>
+          </div>
+          {activeConfig?.connectionMode === 'console' && (
+            <div className="flex flex-col">
+              <span className="text-[9px] uppercase tracking-tighter opacity-50">LPAR</span>
+              <span className="text-zinc-300 font-mono text-[10px]">{activeConfig?.lparName}</span>
+            </div>
+          )}
         </div>
       </header>
 

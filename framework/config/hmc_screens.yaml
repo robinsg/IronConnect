@@ -1,0 +1,38 @@
+hmc_login:
+  screen_name: "HMC Login"
+  indicators:
+    - { text: "Login:", row: 20, col: 20 }
+    - { text: "Password:", row: 21, col: 20 }
+  fields:
+    user: { tabs_to_reach: 0 }
+    password: { tabs_to_reach: 1 }
+
+hmc_main_menu:
+  screen_name: "HMC Main Menu"
+  indicators:
+    - "Hardware Management Console"
+    - "Managed Systems"
+  fields:
+    selection: { tabs_to_reach: 0 }
+
+hmc_managed_system_selection:
+  screen_name: "HMC Managed Systems"
+  indicators:
+    - "Select a Managed System"
+  fields:
+    selection: { tabs_to_reach: 0 }
+
+hmc_partition_selection:
+  screen_name: "HMC Partitions"
+  indicators:
+    - "Select a Partition"
+  fields:
+    selection: { tabs_to_reach: 0 }
+
+hmc_console_task:
+  screen_name: "HMC Console Task"
+  indicators:
+    - "Opening Dedicated Terminal"
+    - "Opening Shared Terminal"
+  fields:
+    password: { tabs_to_reach: 0 }

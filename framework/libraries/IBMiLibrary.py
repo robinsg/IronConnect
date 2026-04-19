@@ -3,6 +3,7 @@ from robot.api import logger
 from framework.core.terminal_driver import TmuxDriver
 from framework.core.config import IBMiConfig
 from framework.screens.login_screen import LoginScreen
+from framework.screens.hmc_console_screen import HMCConsoleScreen
 
 class IBMiLibrary:
     """
@@ -15,37 +16,61 @@ class IBMiLibrary:
     def __init__(self):
         self.driver: Optional[TmuxDriver] = None
         self.current_screen = None
+        self.config: Optional[IBMiConfig] = None
 
-    def initialize_connection(self, host: Optional[str] = None, ssl: bool = False, device_name: Optional[str] = None):
+    def initialize_connection(self, host: Optional[str] = None, ssl: bool = False, connection_mode: str = "direct"):
         """
         Initialises the TN5250 connection via Tmux.
+        Supports 'direct' and 'console' modes.
         
         Example:
-        | Initialize Connection | host=pub400.com | ssl=${True} |
+        | Initialize Connection | connection_mode=console |
         """
-        config = IBMiConfig.load()
+        self.config = IBMiConfig.load()
         if host:
-            config.host = host
+            self.config.host = host
         if ssl:
-            config.ssl_enabled = ssl
-        if device_name:
-            config.device_name = device_name
+            self.config.ssl_enabled = ssl
+        
+        self.config.connection_mode = connection_mode
             
         self.driver = TmuxDriver()
-        self.driver.start_session(config=config)
-
-    def login_to_system(self, user: str, password: str):
-        """
-        Performs a login using the LoginScreen POM.
         
-        Example:
-        | Login To System | user=MYUSER | password=MYPASS |
-        """
-        if not self.driver:
-            raise RuntimeError("Driver not initialised. Call 'Initialize Connection' first.")
+        # When in console mode, we connect to HMC target on port 2301
+        # We need to temporarily override host/ssl for the driver if it's console mode
+        if connection_mode == "console":
+            if not self.config.hmc_host:
+                raise ValueError("HMC_HOST must be set for console connection mode")
             
+            # HMC always requires SSL on port 2301
+            # We modify the config object passed to the driver start_session
+            console_cfg = IBMiConfig.load()
+            console_cfg.host = f"{self.config.hmc_host}:2301"
+            console_cfg.ssl_enabled = True
+            self.driver.start_session(config=console_cfg)
+        else:
+            self.driver.start_session(config=self.config)
+
+    def login_to_system(self, user: Optional[str] = None, password: Optional[str] = None):
+        """
+        Performs a login. If connection_mode is 'console', it first navigates 
+        through the HMC menus to establish the console session.
+        """
+        if not self.driver or not self.config:
+            raise RuntimeError("Driver not initialised. Call 'Initialize Connection' first.")
+
+        # 1. Handle HMC navigation if necessary
+        if self.config.connection_mode == "console":
+            hmc = HMCConsoleScreen(self.driver)
+            hmc.establish_console(self.config)
+
+        # 2. Proceed with standard IBM i login
         login_screen = LoginScreen(self.driver)
-        login_screen.login(user, password)
+        # Use provided credentials or fall back to config
+        u = user if user else self.config.user
+        p = password if password else self.config.password
+        
+        login_screen.login(u, p)
         self.current_screen = login_screen
 
     def verify_positional_text(self, text: str, row: int, col: int):

@@ -78,7 +78,13 @@ async function startServer() {
             deviceType: deviceType,
             map: process.env.IBMI_MAP || '285',
             width: isWide ? 132 : 80,
-            height: isWide ? 27 : 24
+            height: isWide ? 27 : 24,
+            connectionMode: process.env.IBMI_CONNECTION_MODE || 'direct',
+            hmcHost: process.env.HMC_HOST || 'NOT SET',
+            hmcUser: process.env.HMC_USER ? '********' : 'NOT SET',
+            powerSystem: process.env.POWER_SYSTEM || 'NOT SET',
+            lparName: process.env.LPAR_NAME || 'NOT SET',
+            consolePassword: process.env.CONSOLE_PASSWORD ? '********' : 'NOT SET'
         });
     });
 
