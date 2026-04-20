@@ -8,12 +8,20 @@ class BaseScreen:
     Base class for all screen objects. Implements the Screen State Machine.
     """
     
-    def __init__(self, driver: TmuxDriver, config_path: str):
+    def __init__(self, driver: TmuxDriver, config_path: str, screen_key: Optional[str] = None):
         self.driver = driver
         with open(config_path, 'r') as f:
-            self.config = yaml.safe_load(f)
+            full_config = yaml.safe_load(f)
         
-        self.screen_name = self.config.get('screen_name')
+        # Support for multi-screen YAML files where each screen is a top-level key
+        if screen_key:
+            self.config = full_config.get(screen_key)
+            if not self.config:
+                raise KeyError(f"Screen key '{screen_key}' not found in {config_path}")
+        else:
+            self.config = full_config
+        
+        self.screen_name = self.config.get('screen_name', screen_key or "Unnamed Screen")
         self.indicators = self.config.get('indicators', [])
         self.fields = self.config.get('fields', {})
 

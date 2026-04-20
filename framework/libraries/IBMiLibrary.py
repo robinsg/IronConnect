@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Optional, Dict
 from robot.api import logger
 from framework.core.terminal_driver import TmuxDriver
 from framework.core.config import IBMiConfig
+from framework.core.base_screen import BaseScreen
 from framework.screens.login_screen import LoginScreen
 from framework.screens.hmc_console_screen import HMCConsoleScreen
 
@@ -15,7 +16,7 @@ class IBMiLibrary:
 
     def __init__(self):
         self.driver: Optional[TmuxDriver] = None
-        self.current_screen = None
+        self.current_screen: Optional[BaseScreen] = None
         self.config: Optional[IBMiConfig] = None
 
     def initialize_connection(self, host: Optional[str] = None, ssl: bool = False, connection_mode: str = "direct"):
@@ -50,6 +51,34 @@ class IBMiLibrary:
             self.driver.start_session(config=console_cfg)
         else:
             self.driver.start_session(config=self.config)
+
+    def verify_and_interact_with_screen(self, config_path: str, screen_key: str, data: Optional[Dict] = None, submit_key: str = "Enter"):
+        """
+        Generic keyword to verify a screen and fill fields without a dedicated Python class.
+        
+        Example:
+        | &{data}= | Create Dictionary | cust_id=12345 | region=UK |
+        | Verify and Interact With Screen | config_path=framework/config/inventory_screens.yaml | screen_key=part_lookup | data=${data} |
+        """
+        if not self.driver:
+            raise RuntimeError("Driver not initialised.")
+            
+        # Dynamically instantiate BaseScreen with the specific YAML key
+        screen = BaseScreen(self.driver, config_path, screen_key)
+        
+        # 1. State Machine: Verify indicators
+        screen.verify()
+        
+        # 2. Fill fields if data is provided
+        if data:
+            for field, value in data.items():
+                screen.fill_field(field, value)
+        
+        # 3. Submit
+        if submit_key:
+            screen.press_key(submit_key)
+            
+        self.current_screen = screen
 
     def login_to_system(self, user: Optional[str] = None, password: Optional[str] = None):
         """

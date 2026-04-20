@@ -100,6 +100,22 @@ IPL Monitoring Task
     Login To System          user=QSECOFR    password=PASSWORD
 ```
 
+### Scalable Data-Driven Automation
+To avoid a massive number of Python classes, the framework supports **Generic Dynamic Screens**. You can define dozens of screens in an external YAML file and automate them using a single keyword.
+
+**Example Dynamic Worklfow (`tasks/custom_tests.robot`):**
+```robot
+*** Test Cases ***
+Verify Inventory System
+    Initialize Connection
+    # No Python class needed for these screens:
+    Verify and Interact With Screen    config_path=framework/config/inventory.yaml    screen_key=main_menu     data=${selection_data}
+    Verify and Interact With Screen    config_path=framework/config/inventory.yaml    screen_key=part_lookup    data=${part_id_data}
+    [Teardown]    Close Connection
+```
+
+This approach allows you to scale to 30+ screens per system with zero additional code—simply update your YAML definitions.
+
 ## Security & Stability
 - **Mandatory Validation**: Every navigation is verified against YAML indicators.
 - **Exception Handling**: Custom hierarchy for `TerminalTimeoutError`, `ScreenMismatchError`, etc.
